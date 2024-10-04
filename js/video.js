@@ -38,18 +38,30 @@ const loadVideos = () => {
 // display videos
 const displayVideos = (data) => {
     const videoContainer = document.getElementById('video-container')
-
+    videoContainer.innerHTML=''
+    // console.log(data)
+    if(data.length === 0){
+        videoContainer.classList.remove('grid')
+        videoContainer.innerHTML= `
+        <div class="flex flex-col gap-6 justify-center items-center min-w-[300px]">
+            <img src="assets/Icon.png" alt="">
+            <p class="text-2xl font-bold">No content Here in this category</p>
+        </div>
+        `
+        return
+    }
+    else{
+        videoContainer.classList.add('grid') 
+    }
     data.forEach(item => {
-        console.log(item)
+        // console.log(item)
         // create card
         const div = document.createElement('div')
         div.classList = 'card card-compact bg-base-100'
         div.innerHTML = `
-        <figure class="h-[250px]">
-            <img
-                class= "h-full w-full object-cover"
-                src="${item.thumbnail}"
-                alt="" />
+        <figure class="h-[250px] relative">
+            <img class= "h-full w-full object-cover" src="${item.thumbnail}" alt="" />
+            <span class = "absolute bg-black text-white right-2 bottom-2 p-2">${item.others.posted_date}</span>
         </figure>
         <div class="py-3 flex gap-5">
             <div>
@@ -59,7 +71,7 @@ const displayVideos = (data) => {
                 <h2 class = "font-bold text-xl">${item.title}</h2>
                 <div class= "flex gap-2 items-center">
                     <p class= "text-gray-500 ">${item.authors[0].profile_name}</p>
-                    <img class= "w-5 " src="https://img.icons8.com/?size=100&id=98A4yZTt9abw&format=png&color=000000" alt="">
+                    ${item.authors[0].verified ? `<img class= "w-5 " src="https://img.icons8.com/?size=100&id=98A4yZTt9abw&format=png&color=000000" alt="">` : '' }
                 </div>
                 <p class= "text-gray-500 ">${item.others.views} views </p>
             </div>
@@ -76,15 +88,24 @@ const displayCatagories = (data) => {
 
     data.forEach(item => {
         // creat button
-        const button = document.createElement('button')
-        button.classList = 'btn'
-        button.innerText = item.category
+        const div = document.createElement('div')
+        div.innerHTML =`
+        <button onclick="loadCatagoriesVideo(${item.category_id})" class="btn">${item.category}</button>
+        `
+
         // button add
-        btnContainer.append(button)
+        btnContainer.append(div)
     })
 }
 
-
+const loadCatagoriesVideo = (id) =>{
+    // fetch
+    fetch(`https://openapi.programming-hero.com/api/phero-tube/category/${id}`)
+        .then(res => res.json())
+        .then(data => displayVideos(data.category))
+        .catch(err => console.log(err))
+        
+}
 
 
 
