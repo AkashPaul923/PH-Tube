@@ -68,12 +68,13 @@ const displayVideos = (data) => {
                 <img class = "h-10 w-10 rounded-full object-cover" src=${item.authors[0].profile_picture} alt="">
             </div>
             <div>
-                <h2 class = "font-bold text-xl">${item.title}</h2>
+                <h2  class = "font-bold text-xl">${item.title}</h2>
                 <div class= "flex gap-2 items-center">
                     <p class= "text-gray-500 ">${item.authors[0].profile_name}</p>
                     ${item.authors[0].verified ? `<img class= "w-5 " src="https://img.icons8.com/?size=100&id=98A4yZTt9abw&format=png&color=000000" alt="">` : '' }
                 </div>
                 <p class= "text-gray-500 ">${item.others.views} views </p>
+                <button onclick= "loadDetail('${item.video_id}')" >detail</button>
             </div>
         </div>
         `
@@ -90,7 +91,7 @@ const displayCatagories = (data) => {
         // creat button
         const div = document.createElement('div')
         div.innerHTML =`
-        <button onclick="loadCatagoriesVideo(${item.category_id})" class="btn">${item.category}</button>
+        <button id="btn-${item.category_id}" onclick="loadCatagoriesVideo(${item.category_id})" class="btn category-btn">${item.category}</button>
         `
 
         // button add
@@ -102,11 +103,55 @@ const loadCatagoriesVideo = (id) =>{
     // fetch
     fetch(`https://openapi.programming-hero.com/api/phero-tube/category/${id}`)
         .then(res => res.json())
-        .then(data => displayVideos(data.category))
+        .then(data => {
+            displayVideos(data.category)
+            activeBtn(`btn-${id}`)
+        })
         .catch(err => console.log(err))
         
 }
 
+// active btn style
+const activeBtn = (id) => {
+    const buttons = document.getElementsByClassName('category-btn')
+    for(const button of buttons){
+        button.classList.remove('bg-red-500')
+        button.classList.remove('text-white')
+
+    }
+
+//     // style add
+    const btnActive = document.getElementById(id)
+    btnActive.classList.add('bg-red-500')
+    btnActive.classList.add('text-white')
+}
+
+
+// load all video 
+const loadAllVideos = (id) =>{
+    activeBtn(id)
+    loadVideos() 
+} 
+
+// load detail
+const loadDetail = async(videoId) => {
+    const res = await fetch(`https://openapi.programming-hero.com/api/phero-tube/video/${videoId}`)
+    const data = await res.json()
+    displayVideoDetail(data.video)
+}
+
+// display detail
+const displayVideoDetail = (videoDetail) =>{
+    // console.log(videoDetail)
+    const modalContainer = document.getElementById("modal-container")
+    modalContainer.innerHTML = `
+    <img src="${videoDetail.thumbnail}"  />
+    <h1 class="text-xl font-bold">${videoDetail.title}</h1>
+    <p>${videoDetail.description}</p>
+    `
+
+    document.getElementById('modal-btn').click()
+}
 
 
 loadCatagories()
